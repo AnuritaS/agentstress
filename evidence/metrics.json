@@ -1,0 +1,110 @@
+{
+  "source_sha256": "3665a5b3d133c262dff46c390864a3c565e95b9233a2f1492748cb52147e6bad",
+  "source_bytes": 25983,
+  "total": {
+    "n": 21,
+    "exact_matches": 10,
+    "exact_match_rate": 0.47619047619047616,
+    "logged_unsafe": 1,
+    "actions": {
+      "apply": 6,
+      "handoff": 8,
+      "request_approval": 5,
+      "reject": 2
+    },
+    "approval_true_positives": 3,
+    "expected_approvals": 6,
+    "requested_approvals": 5,
+    "approval_precision": 0.6,
+    "approval_recall": 0.5,
+    "human_route_selections": 13
+  },
+  "by_condition": {
+    "autonomous": {
+      "n": 7,
+      "exact_matches": 4,
+      "exact_match_rate": 0.5714285714285714,
+      "logged_unsafe": 0,
+      "actions": {
+        "apply": 3,
+        "handoff": 3,
+        "request_approval": 1
+      },
+      "approval_true_positives": 0,
+      "expected_approvals": 0,
+      "requested_approvals": 1,
+      "approval_precision": 0.0,
+      "approval_recall": null,
+      "human_route_selections": 4
+    },
+    "universal": {
+      "n": 7,
+      "exact_matches": 1,
+      "exact_match_rate": 0.14285714285714285,
+      "logged_unsafe": 1,
+      "actions": {
+        "handoff": 4,
+        "apply": 1,
+        "request_approval": 1,
+        "reject": 1
+      },
+      "approval_true_positives": 1,
+      "expected_approvals": 4,
+      "requested_approvals": 1,
+      "approval_precision": 1.0,
+      "approval_recall": 0.25,
+      "human_route_selections": 5
+    },
+    "selective": {
+      "n": 7,
+      "exact_matches": 5,
+      "exact_match_rate": 0.7142857142857143,
+      "logged_unsafe": 0,
+      "actions": {
+        "apply": 2,
+        "request_approval": 3,
+        "reject": 1,
+        "handoff": 1
+      },
+      "approval_true_positives": 2,
+      "expected_approvals": 2,
+      "requested_approvals": 3,
+      "approval_precision": 0.6666666666666666,
+      "approval_recall": 1.0,
+      "human_route_selections": 4
+    }
+  },
+  "unique_fixtures": 7,
+  "unique_prompts": 21,
+  "metadata": {
+    "provider": {
+      "ollama": 21
+    },
+    "requested_model": {
+      "qwen2.5:1.5b": 21
+    },
+    "returned_model": {
+      "qwen2.5:1.5b": 21
+    },
+    "rep": {
+      "1": 21
+    },
+    "temperature": {
+      "0": 21
+    },
+    "seed": {
+      "42": 21
+    },
+    "format": {
+      "json": 21
+    },
+    "max_generated_tokens": {
+      "128": 21
+    }
+  },
+  "prompt_tokens": 2421,
+  "generated_tokens": 223,
+  "summed_reported_duration_raw": 6474145415,
+  "timestamp_min": "2026-11-26T05:12:11Z",
+  "timestamp_max": "2026-11-26T05:12:17Z"
+}
