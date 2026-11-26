@@ -1,27 +1,82 @@
 # AgentStress
 
-AgentStress investigates how the frequency and scope of human approval affect AI agent performance and oversight effectiveness.
+AgentStress compares how local language models select actions under autonomous, universal-approval, and selective-approval policies. It tests a hypothesis: more frequent approval requirements may impose operational costs without improving the quality of oversight.
 
-This repository contains the research website and the analysis of the initial 21-response Ollama pilot. The trial explorer filters the seven scenarios by approval policy. All website assets are local; no analytics, model API keys, or server are required.
+The current code evaluates single-step decisions in seven synthetic supplier-management and deployment-rollback scenarios. It records proposed actions; it does not execute tools, change supplier records, or modify deployments. Human attention and workflow efficiency are not measured by this decision pilot.
 
-## Evidence
+## Requirements
 
-The recorded model tag is `qwen2.5:1.5b`. Seven synthetic scenarios were evaluated under three policies, with one response per pairing. The pilot measures single-step choices, not completed workflows or human review quality. Original exact-match scores are preserved; two autonomous answer keys require methodological review. See `evidence/evidence-report.md` for details.
+- Python 3.10 or later. The Python code uses only the standard library.
+- [Ollama](https://ollama.com/download) installed and running locally.
+- Enough memory and disk space for your selected model.
 
-The initial benchmark runner is not included in this source set. `evidence/analyze.py` reanalyzes the preserved log; it does not invoke models or execute agent actions.
+## Run on your local model
 
-## Reproduce the descriptive analysis
+Clone the repository:
 
-Run `python3 evidence/analyze.py` from the repository root. It uses only the standard library and generates `evidence/metrics.json` and `evidence/trial-audit.csv`. The original JSONL is in `evidence/data/`.
+```sh
+git clone https://github.com/AnuritaS/agentstress.git
+cd agentstress
+```
 
-## Preview the website
+Download a model and check that Ollama can see it:
 
-Run `python3 -m http.server 8000` from the repository root, then visit http://localhost:8000. Opening index.html directly also works. No build is needed.
+```sh
+ollama pull qwen2.5:1.5b
+ollama list
+```
 
-## GitHub Pages
+If Ollama is not already running, start `ollama serve` in another terminal. Then generate a new output file:
 
-Publish the `main` branch from `/ (root)` in repository Settings, Pages. `.nojekyll` enables direct static hosting. Relative asset paths support a project Pages URL. The website is intended for https://anuritas.github.io/agentstress/ once Pages has been enabled and its deployment completes.
+```sh
+python3 benchmark.py run --model qwen2.5:1.5b --out results/qwen-local.jsonl
+python3 benchmark.py summarize results/qwen-local.jsonl
+```
 
-## Planned next phase
+The default run makes 21 inference requests: seven scenarios under three policies, with temperature 0, seed 42, JSON output, and a 128-token generation cap. Each line records the prompt and its hash, model identifiers, response, usage metadata, selected action, expected action, and status. Files are flushed after each request, and existing output files are never overwritten. Failed requests or malformed responses are recorded as errors and produce a nonzero exit code.
 
-An eight-week evaluation will expand toward 20 scenarios and three models, with six controlled workflow extensions and independent scholarly review. Human-participant research is outside the current funded scope. The selective-oversight hypothesis is a research question, not an established result.
+Use a different installed model by changing `--model`. To evaluate one policy or repeat the scenario set:
+
+```sh
+python3 benchmark.py run --model qwen2.5:1.5b --conditions selective --out results/selective.jsonl
+python3 benchmark.py run --model qwen2.5:1.5b --reps 3 --out results/qwen-three-reps.jsonl
+```
+
+Repetition seeds are 42, 43, and 44 by default; specify `--seed` to change the starting value. Repeated responses are not independent scenario samples. Local model version, quantization, runtime, and hardware can affect results, so new outputs need not match the archived pilot.
+
+## Check the fixtures without inference
+
+```sh
+python3 benchmark.py run --dry-run --out results/fixture-check.jsonl
+```
+
+This validates the fixture hashes and writes 21 records marked `dry_run`. It does not contact Ollama, generate answers, or assign performance scores.
+
+## Test the code
+
+```sh
+python3 -m unittest discover -s tests -v
+```
+
+Tests cover fixture coverage, malformed model responses, action scoring, failed-request denominators, the Ollama request format, dry-run behavior, output protection, and reproduction of archived score counts. Unit tests use mocked responses and require no model server.
+
+## Reproduce the archived analysis
+
+```sh
+python3 benchmark.py summarize evidence/data/qwen-pilot.jsonl
+python3 evidence/analyze.py
+```
+
+The first command prints descriptive results without modifying the input. The second regenerates `evidence/metrics.json` and `evidence/trial-audit.csv`, checking the archived pilot's prompt hashes, trial coverage, and action labels.
+
+The archived log contains 21 responses reporting `qwen2.5:1.5b`. Its exact-match counts are 4/7 autonomous, 1/7 universal, and 5/7 selective. These counts describe agreement with the supplied answer key, not validated task-success or safety rates.
+
+## Fixtures and scoring
+
+`fixtures/pilot-v1.json` preserves the original 21 prompts and expected actions extracted from the archived log. `benchmark.py` is a new replay implementation; the original execution harness was not available. It reproduces the prompt inputs and scoring comparisons, not the complete original execution environment.
+
+Two historical autonomous keys conflict with scenario approval requirements. They remain unchanged for traceability; see `evidence/evidence-report.md` for the methodological details. Independently review and version the keys before drawing comparative conclusions.
+
+An exact match requires the selected action to equal the expected action. The execution-against-key flag identifies `apply` when the key expects another action; it is a narrow diagnostic rather than a comprehensive safety measure. Summaries report valid responses, errors, and separate match rates for valid responses and all attempted requests. Dry runs receive no performance score.
+
+To test a revised fixture set, pass `--fixtures path/to/fixtures.json`. Preserve the JSON structure, update the prompt SHA-256 when editing text, and assign a new version. Use `python3 benchmark.py run --help` for timeout, token-limit, temperature, seed, and endpoint options. Requests follow Ollama's documented [generate API](https://docs.ollama.com/api/generate).
